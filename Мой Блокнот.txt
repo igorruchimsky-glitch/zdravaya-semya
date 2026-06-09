@@ -1,0 +1,31 @@
+https://api.telegram.org/bot8926556397:AAEpu_rnkqsscD4_7p_4cJ4fECm2K31gic4/getMe
+
+https://api.telegram.org/bot8926556397:AAEpu_rnkqsscD4_7p_4cJ4fECm2K31gic4/getUpdates
+
+TELEGRAM_BOT_TOKEN=8926556397:AAEpu_rnkqsscD4_7p_4cJ4fECm2K31gic4
+TELEGRAM_CHAT_ID=882491587 (ваше число)
+ADMIN_PASSWORD=Lushina01031964
+
+git remote add origin https://github.com/igorruchimsky-glitchzdravaya-semya/zdravaya-semya_РЕПО.git
+git branch -M main
+git push -u origin main
+
+Итоговый статус
+Сайт доступен: https://zsemya.ru
+
+Админ-панель: https://zsemya.ru/admin (пароль Lushina01031964)
+
+Форма записи: работает, данные уходят в Supabase
+
+Telegram-уведомления: активны
+
+Карта отделений: загружается
+
+Временный URL Vercel: также работает
+
+Если что-то нужно поправить
+Цвета можно менять в globals.css (переменные --primary, --secondary)
+
+Тексты услуг, врачей, преимуществ — в page.tsx
+
+Логотип (заменить текстовый на изображение) — добавить в layout.tsx
