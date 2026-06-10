@@ -14,8 +14,7 @@ export const metadata: Metadata = {
   },
 }
 
-export const revalidate = 3600 // Пересчитывать кэш страницы раз в час
-
+export const revalidate = 0
 interface Branch {
   id: number
   name: string
