@@ -13,7 +13,6 @@ import {
 } from '@/components/ui/table'
 import { Badge } from '@/components/ui/badge'
 
-// Строгая типизация данных для защиты от ошибок компиляции
 interface Appointment {
   id: number
   patient_name: string
@@ -21,8 +20,8 @@ interface Appointment {
   preferred_date: string
   status: string
   created_at: string
-  branches?: {
-    name: string
+  ветви?: {
+    Имя: string
   } | null
 }
 
@@ -33,7 +32,6 @@ export default function AdminPage() {
   const [loading, setLoading] = useState<boolean>(false)
   const [error, setError] = useState<string | null>(null)
 
-  // Проверяем наличие токена в сессии при первичной загрузке страницы
   useEffect(() => {
     const savedPassword = sessionStorage.getItem('admin_token')
     if (savedPassword) {
@@ -41,7 +39,6 @@ export default function AdminPage() {
     }
   }, [])
 
-  // Изолированная функция запроса к API
   const fetchAppointments = async (token: string) => {
     setLoading(true)
     setError(null)
@@ -49,12 +46,12 @@ export default function AdminPage() {
       const res = await fetch('/api/admin/appointments', {
         headers: { Authorization: `Bearer ${token}` }
       })
-      
+
       if (res.ok) {
         const data: Appointment[] = await res.json()
         setAppointments(data)
         setAuthenticated(true)
-        sessionStorage.setItem('admin_token', token) // Сохраняем сессию
+        sessionStorage.setItem('admin_token', token)
       } else {
         setError('Неверный пароль или доступ запрещен')
         sessionStorage.removeItem('admin_token')
@@ -66,7 +63,6 @@ export default function AdminPage() {
     }
   }
 
-  // Обработчик отправки формы (по кнопке или нажатию Enter)
   const handleLogin = (e: FormEvent) => {
     e.preventDefault()
     if (!password.trim()) {
@@ -76,7 +72,6 @@ export default function AdminPage() {
     fetchAppointments(password)
   }
 
-  // Функция выхода из панели
   const handleLogout = () => {
     sessionStorage.removeItem('admin_token')
     setAuthenticated(false)
@@ -84,7 +79,20 @@ export default function AdminPage() {
     setPassword('')
   }
 
-  // Экран авторизации
+  // Вспомогательная функция для красивого парсинга имени, врача и услуги
+  const parsePatientData = (fullNameString: string) => {
+    const match = fullNameString.match(/(.*?)\[Врач:\s*(.*?)\s*\|\s*Услуга:\s*(.*?)\s*\]/)
+    if (match) {
+      return {
+        name: match[1].trim(),
+        doctor: match[2].trim(),
+        service: match[3].trim(),
+        hasMeta: true
+      }
+    }
+    return { name: fullNameString, doctor: '', service: '', hasMeta: false }
+  }
+
   if (!authenticated) {
     return (
       <main className="container mx-auto p-4 max-w-md min-h-screen flex flex-col justify-center">
@@ -102,7 +110,7 @@ export default function AdminPage() {
               />
             </div>
             {error && <p className="text-sm text-destructive font-medium">{error}</p>}
-            <Button type="submit" disabled={loading} className="w-full">
+            <Button type="submit" disabled={loading} className="w-full bg-slate-900 hover:bg-slate-800 text-white">
               {loading ? 'Проверка...' : 'Войти'}
             </Button>
           </form>
@@ -111,7 +119,6 @@ export default function AdminPage() {
     )
   }
 
-  // Экран панели управления (Данные авторизованы)
   return (
     <main className="container mx-auto p-6 space-y-6">
       <div className="flex justify-between items-center border-b pb-4">
@@ -129,12 +136,12 @@ export default function AdminPage() {
           <p className="text-muted-foreground">Новых записей на приём не обнаружено.</p>
         </div>
       ) : (
-        <div className="rounded-md border bg-card">
+        <div className="rounded-md border bg-card overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>
                 <TableHead className="w-[80px]">ID</TableHead>
-                <TableHead>Имя пациента</TableHead>
+                <TableHead className="min-w-[250px]">Пациент / Направление</TableHead>
                 <TableHead>Телефон</TableHead>
                 <TableHead>Желаемая дата</TableHead>
                 <TableHead>Отделение</TableHead>
@@ -143,25 +150,43 @@ export default function AdminPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {appointments.map((app) => (
-                <TableRow key={app.id}>
-                  <TableCell className="font-mono text-xs text-muted-foreground">
-                    {app.id}
-                  </TableCell>
-                  <TableCell className="font-medium">{app.patient_name}</TableCell>
-                  <TableCell className="font-mono">{app.patient_phone}</TableCell>
-                  <TableCell>{app.preferred_date}</TableCell>
-                  <TableCell>{app.branches?.name || '—'}</TableCell>
-                  <TableCell>
-                    <Badge variant={app.status === 'new' ? 'default' : 'secondary'}>
-                      {app.status}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-right text-xs text-muted-foreground">
-                    {new Date(app.created_at).toLocaleString('ru-RU')}
-                  </TableCell>
-                </TableRow>
-              ))}
+              {appointments.map((app) => {
+                const parsed = parsePatientData(app.patient_name)
+                // Берем название из кириллической связи таблиц Supabase
+const branchName = app.ветви?.Имя || '—'
+
+                return (
+                  <TableRow key={app.id}>
+                    <TableCell className="font-mono text-xs text-muted-foreground">
+                      {app.id}
+                    </TableCell>
+                    <TableCell>
+                      <div className="font-medium text-slate-900">{parsed.name}</div>
+                      {parsed.hasMeta && (
+                        <div className="flex flex-wrap gap-1.5 mt-1">
+                          <Badge variant="secondary" className="bg-teal-50 text-teal-700 hover:bg-teal-50 border-teal-200 text-[11px] px-1.5 py-0">
+                            🔬 {parsed.service}
+                          </Badge>
+                          <Badge variant="secondary" className="bg-blue-50 text-blue-700 hover:bg-blue-50 border-blue-200 text-[11px] px-1.5 py-0">
+                            👨‍⚕️ {parsed.doctor}
+                          </Badge>
+                        </div>
+                      )}
+                    </TableCell>
+                    <TableCell className="font-mono text-slate-700">{app.patient_phone}</TableCell>
+                    <TableCell className="text-slate-700">{app.preferred_date}</TableCell>
+                    <TableCell className="text-slate-600 text-sm">{branchName}</TableCell>
+                    <TableCell>
+                      <Badge variant={app.status === 'new' ? 'default' : 'secondary'} className={app.status === 'new' ? 'bg-emerald-600 text-white' : ''}>
+                        {app.status === 'new' ? 'Новая' : app.status}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-right text-xs text-muted-foreground">
+                      {new Date(app.created_at).toLocaleString('ru-RU')}
+                    </TableCell>
+                  </TableRow>
+                )
+              })}
             </TableBody>
           </Table>
         </div>

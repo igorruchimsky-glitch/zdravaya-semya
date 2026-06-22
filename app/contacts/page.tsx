@@ -1,93 +1,202 @@
 import { Metadata } from 'next'
-import { supabase } from '@/lib/supabaseClient'
-import SafeMap from '@/components/SafeMap' // Импортируем нашу безопасную обертку
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import Link from 'next/link'
 
 export const metadata: Metadata = {
-  title: 'Адреса и контакты отделений | ЛДЦ Здоровая Семья',
-  description: 'Контакты, телефоны и режим работы медицинских центров «Здоровая Семья» в Пензе и Заречном. Схема проезда и интерактивная карта отделений.',
-  openGraph: {
-    title: 'Контакты ЛДЦ Здоровая Семья',
-    description: 'Режим работы и адреса наших медицинских отделений.',
-    type: 'website',
+  title: 'Контакты и адреса отделений | ЛДЦ «Здоровая Семья»',
+  description: 'Адреса, телефоны и режим работы медицинских центров ЛДЦ «Здоровая Семья» в Пензе и Заречном. Единый многоканальный телефон, реквизиты и лицензии клиники.',
+}
+
+const branches = [
+  {
+    id: 1,
+    title: 'Отделение в г. Заречный',
+    address: '442960, Пензенская обл., г. Заречный, ул. им. М.В. Проценко, строение 15',
+    phone: '8 (841-2) 99-58-01 (доб. 1)',
+    telLink: '+78412995801',
+    time: 'пн-пт с 07:00 до 14:00\nсб с 07:30 до 14:30\nвс — выходной',
+    borderColor: 'border-t-blue-900',
+    textColor: 'text-blue-950'
   },
-}
-
-export const revalidate = 0
-interface Branch {
-  id: number
-  name: string
-  address: string
-  phone: string
-  working_hours: string
-}
-
-export default async function ContactsPage() {
-  const { data: branches, error } = await supabase
-    .from('branches')
-    .select('id, name, address, phone, working_hours')
-
-  if (error) {
-    console.error('[SUPABASE CONTACTS FETCH ERROR]:', error.message)
+  {
+    id: 2,
+    title: 'Отделение на Тернопольской',
+    address: '440066, г. Пенза, ул. Тернопольская, д. 10, пом. 7 (Ближнее Арбеково)',
+    phone: '8 (841-2) 99-58-01 (доб. 2)',
+    telLink: '+78412995801',
+    time: 'пн-сб с 07:30 до 14:30\nвс — выходной',
+    borderColor: 'border-t-teal-600',
+    textColor: 'text-teal-700'
+  },
+  {
+    id: 3,
+    title: 'Отделение на проспекте Строителей',
+    address: '440066, г. Пенза, пр-кт Строителей, д. 174 (Дальнее Арбеково)',
+    phone: '8 (841-2) 99-58-01 (доб. 3)',
+    telLink: '+78412995801',
+    time: 'пн-сб с 07:30 до 14:30\nвс — выходной',
+    borderColor: 'border-t-blue-600',
+    textColor: 'text-blue-600'
+  },
+  {
+    id: 4,
+    title: 'Отделение на Измайлова',
+    address: '440000, г. Пенза, ул. Измайлова, д. 58А, корп. 3, пом. 4 (ГПЗ-24)',
+    phone: '8 (841-2) 99-58-01 (доб. 4)',
+    telLink: '+78412995801',
+    time: 'пн-сб с 07:30 до 14:30\nвс — выходной',
+    borderColor: 'border-t-indigo-600',
+    textColor: 'text-indigo-600'
   }
+]
 
-  const hasBranches = branches && branches.length > 0
-
+export default function ContactsPage() {
   return (
-    <div className="container mx-auto px-4 py-8 max-w-6xl space-y-8">
-      <div className="space-y-2">
-        <h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl">
-          Наши отделения
-        </h1>
-        <p className="text-muted-foreground text-sm sm:text-base">
-          Информация о филиалах медицинского центра, графике работы и контактных телефонах.
-        </p>
-      </div>
+    <div className="bg-white text-slate-800 font-sans min-h-screen pb-20">
 
-      {/* Блок интерактивной карты через безопасную обертку */}
-      <div className="h-96 w-full rounded-xl overflow-hidden border shadow-sm bg-muted">
-        <SafeMap branches={branches || []} />
-      </div>
-
-      {/* Сетка карточек отделений */}
-      {!hasBranches ? (
-        <Alert variant="destructive">
-          <AlertTitle>Внимание</AlertTitle>
-          <AlertDescription>
-            Не удалось загрузить список отделений. Пожалуйста, свяжитесь с нами по общему телефону или зайдите позже.
-          </AlertDescription>
-        </Alert>
-      ) : (
-        <div className="grid gap-6 sm:grid-cols-2">
-          {branches.map((branch: Branch) => (
-            <Card key={branch.id} className="overflow-hidden transition-shadow hover:shadow-md">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-xl font-bold tracking-tight text-primary">
-                  {branch.name}
-                </CardTitle>
-              </CardHeader>
-              
-              <CardContent className="space-y-3 text-sm">
-                <div className="space-y-1">
-                  <p className="text-muted-foreground font-medium">📍 Адрес:</p>
-                  <p className="text-foreground font-semibold">{branch.address}</p>
-                </div>
-                
-                <div className="space-y-1">
-                  <p className="text-muted-foreground font-medium">📞 Телефон:</p>
-                  <p className="text-foreground font-mono font-semibold">{branch.phone}</p>
-                </div>
-                
-                <div className="space-y-1">
-                  <p className="text-muted-foreground font-medium">🕒 Режим работы:</p>
-                  <p className="text-foreground whitespace-pre-line">{branch.working_hours}</p>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+      {/* Шапка страницы */}
+      <section className="bg-gradient-to-br from-slate-900 to-slate-950 text-white pt-32 pb-16 px-4 text-center">
+        <div className="max-w-3xl mx-auto space-y-3">
+          <h1 className="text-3xl sm:text-4xl font-black tracking-tight">
+            Наши контакты и отделения
+          </h1>
+          <p className="text-slate-400 text-base sm:text-lg leading-relaxed">
+            Сеть многопрофильных медицинских и диагностических центров в Пензенской области
+          </p>
         </div>
-      )}
+      </section>
+
+      {/* Основной контент */}
+      <main className="max-w-7xl mx-auto mt-12 px-4 space-y-16">
+
+        {/* Блок общего многоканального телефона */}
+        <div className="bg-slate-50 border border-slate-200 rounded-2xl p-8 text-center max-w-3xl mx-auto space-y-4 shadow-sm">
+          <div className="text-3xl">📞</div>
+          <h2 className="text-xl font-bold text-slate-950">
+            Единый многоканальный номер телефона
+          </h2>
+          <p className="text-2xl sm:text-3xl font-black text-teal-600 font-mono tracking-wide">
+            8 (841-2) 99-58-01
+          </p>
+          <p className="text-slate-500 text-sm max-w-lg mx-auto leading-relaxed">
+            Позвоните нам, чтобы задать вопрос, уточнить правила подготовки к анализам или записаться на приём к специалистам.
+          </p>
+          <div className="pt-2">
+            <a href="tel:+78412995801" className="inline-block bg-teal-600 hover:bg-teal-700 text-white px-8 py-3 rounded-xl font-bold transition-all shadow-sm">
+              Позвонить в клинику
+            </a>
+          </div>
+        </div>
+
+        {/* Сетка филиалов */}
+        <div className="space-y-6">
+          <h2 className="text-2xl font-extrabold text-slate-950 tracking-tight text-center sm:text-left">
+            Адреса медицинских центров
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {branches.map((b) => (
+              <div key={b.id} className={`bg-white border border-slate-200 border-t-4 ${b.borderColor} rounded-2xl p-6 flex flex-col justify-between shadow-sm relative overflow-hidden hover:shadow-md transition-shadow`}>
+                <div className="space-y-4">
+                  <h3 className="text-base font-black text-slate-950 leading-snug">
+                    {b.title}
+                  </h3>
+                  <div className="text-xs sm:text-sm text-slate-600 space-y-3">
+                    <p className="leading-relaxed">
+                      <strong className="text-slate-900 block mb-1">📍 Адрес:</strong>
+                      {b.address}
+                    </p>
+                    <p>
+                      <strong className="text-slate-900 block mb-1">📞 Телефон филиала:</strong>
+                      <span className="font-mono font-bold text-slate-950 text-sm">{b.phone}</span>
+                    </p>
+                    <p className="whitespace-pre-line leading-relaxed">
+                      <strong className="text-slate-900 block mb-1">🕒 Режим работы:</strong>
+                      {b.time}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Кнопки действий внутри карточки */}
+                <div className="flex flex-col gap-2 mt-6 pt-4 border-t border-slate-100">
+                  <a href={`tel:${b.telLink}`} className="w-full text-center bg-slate-50 hover:bg-slate-100 text-slate-900 py-2.5 rounded-xl text-xs font-bold transition-colors border border-slate-200">
+                    📞 Набрать номер (доб. {b.id})
+                  </a>
+                  <Link href="/appointment" className={`w-full text-center bg-white border border-current ${b.textColor} py-2.5 rounded-xl text-xs font-bold transition-colors hover:bg-slate-50`}>
+                    Записаться сюда →
+                  </Link>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* НОВЫЙ БЛОК: ЮРИДИЧЕСКАЯ И ПРАВОВАЯ ИНФОРМАЦИЯ */}
+        <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-6 sm:p-8 space-y-6">
+          <div className="border-b border-slate-200 pb-4">
+            <h2 className="text-xl font-extrabold text-slate-950 tracking-tight flex items-center gap-2">
+              <span>🛡️</span> Лицензии и юридическая информация
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-500 mt-1">Официальные сведения о медицинской организации в соответствии с требованиями Минздрава РФ</p>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            
+            {/* Реквизиты организации */}
+            <div className="space-y-3 lg:col-span-1">
+              <h4 className="text-sm font-black uppercase text-slate-400 tracking-wider">Наименование и реквизиты</h4>
+              <div className="text-xs sm:text-sm text-slate-600 space-y-2 leading-relaxed">
+                <p><strong>Полное наименование:</strong><br />Общество с ограниченной ответственностью Лечебно-диагностический центр «Здоровая Семья»</p>
+                <p><strong>Сокращенное наименование:</strong><br />ООО ЛДЦ «Здоровая Семья»</p>
+                <p><strong>Руководство:</strong><br />Генеральный директор / Главный врач:<br />Ручимский Игорь Николаевич</p>
+              </div>
+            </div>
+
+            {/* Сведения о лицензии */}
+            <div className="space-y-3 lg:col-span-1">
+              <h4 className="text-sm font-black uppercase text-slate-400 tracking-wider">Медицинская лицензия</h4>
+              <div className="text-xs sm:text-sm text-slate-600 space-y-2 leading-relaxed">
+                <p><strong>Регистрационный номер:</strong><br />Л041-01166-58/00325325</p>
+                <p><strong>Статус:</strong><br /><span className="inline-flex items-center gap-1 text-emerald-700 font-semibold bg-emerald-50 px-2 py-0.5 rounded-md text-xs">Действующая бессрочно</span></p>
+                <p><strong>Орган, выдавший лицензию:</strong><br />Министерство здравоохранения Пензенской области</p>
+                <p className="text-xs text-slate-400 italic">Предоставляемые услуги соответствуют номенклатуре работ и услуг, утвержденных лицензией на осуществление медицинской деятельности.</p>
+              </div>
+            </div>
+
+            {/* Документы для скачивания */}
+            <div className="space-y-3 lg:col-span-1">
+              <h4 className="text-sm font-black uppercase text-slate-400 tracking-wider">Документы для ознакомления</h4>
+              <div className="flex flex-col gap-2">
+                <a 
+                  href="/docs/licence.pdf" 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="flex items-center gap-3 bg-white hover:bg-slate-100/80 border border-slate-200 p-3 rounded-xl transition-colors group"
+                >
+                  <span className="text-2xl group-hover:scale-110 transition-transform">📄</span>
+                  <div className="text-left">
+                    <p className="text-xs sm:text-sm font-bold text-slate-950 m-0">Выписка из реестра лицензий</p>
+                    <p className="text-[11px] text-slate-400 m-0">Скачать PDF (официальный документ)</p>
+                  </div>
+                </a>
+
+                <a 
+                  href="/docs/rules.pdf" 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="flex items-center gap-3 bg-white hover:bg-slate-100/80 border border-slate-200 p-3 rounded-xl transition-colors group"
+                >
+                  <span className="text-2xl group-hover:scale-110 transition-transform">⚖️</span>
+                  <div className="text-left">
+                    <p className="text-xs sm:text-sm font-bold text-slate-950 m-0">Правила предоставления платных услуг</p>
+                    <p className="text-[11px] text-slate-400 m-0">Скачать PDF • Постановление №736</p>
+                  </div>
+                </a>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </main>
     </div>
   )
 }

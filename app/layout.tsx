@@ -1,5 +1,6 @@
 import './globals.css'
-import Script from 'next/script' // Импортируем безопасный загрузчик скриптов
+import Script from 'next/script'
+import Header from '@/components/Header' // Подключаем изолированный блок шапки
 
 export default function RootLayout({
   children,
@@ -7,32 +8,32 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="ru">
-      <body className="antialiased text-slate-900 bg-background">
+    <html lang="ru" className="scroll-smooth">
+      <body className="antialiased text-slate-900 bg-background min-h-screen flex flex-col">
         
-        {children}
+        {/* Вызов шапки */}
+        <Header />
 
-        {/* --- ВИДЖЕТЫ ЗАПИСИ MEDFLEX & МЕДТОЧКА --- */}
-        {/* Контейнер для круглой кнопки записи */}
-        <div 
-          id="medflexRoundWidgetData"
-          data-src="https://booking.medflex.ru/?user=38061275f1134bb6bb688d741b213f45&isRoundWidget=true"
-        ></div>
+        {/* Основной контент сайта */}
+        <main className="flex-grow">
+          {children}
+        </main>
+
+        {/* КРУГЛАЯ КНОПКА ОНЛАЙН-ЗАПИСИ (MEDFLEX) */}
+        <div className="fixed bottom-5 right-5 z-50">
+          <div 
+            id="medflexRoundWidgetData"
+            data-src="https://booking.medflex.ru/?user=38061275f1134bb6bb688d741b213f45&isRoundWidget=true"
+          ></div>
+        </div>
+        
         <Script 
           src="https://booking.medflex.ru/components/round/round_widget_button.js" 
           strategy="lazyOnload"
-          charset="utf-8"
         />
-
-        {/* Контейнер для кнопки Вход в МедТочку */}
-        <div 
-          id="medflexMedtochkaWidgetButton"
-          data-src="https://booking.medflex.ru/?user=38061275f1134bb6bb688d741b213f45"
-        ></div>
         <Script 
           src="https://booking.medflex.ru/components/medtochka-button/medtochka-widget-button.js" 
           strategy="lazyOnload"
-          charset="utf-8"
         />
       </body>
     </html>
